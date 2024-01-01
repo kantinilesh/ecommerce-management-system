@@ -1,0 +1,132 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_PRODUCTS 100
+#define MAX_ORDERS 100
+
+struct Product {
+    int id;
+    char name[50];
+    float price;
+    int quantity;
+};
+
+struct Order {
+    int orderId;
+    struct Product product;
+    int quantity;
+    float total;
+};
+
+void addProduct(struct Product *inventory, int *productCount) {
+    printf("Enter product name: ");
+    scanf("%s", inventory[*productCount].name);
+    printf("Enter product price: ");
+    scanf("%f", &inventory[*productCount].price);
+    printf("Enter initial quantity: ");
+    scanf("%d", &inventory[*productCount].quantity);
+
+    inventory[*productCount].id = *productCount + 1;
+    (*productCount)++;
+
+    printf("Product added successfully!\n");
+}
+
+void displayProducts(struct Product *inventory, int productCount) {
+    printf("Product ID\tProduct Name\tProduct Price\tQuantity\n");
+    for (int i = 0; i < productCount; i++) {
+        printf("%d\t\t%s\t\t$%.2f\t\t%d\n", inventory[i].id, inventory[i].name,
+               inventory[i].price, inventory[i].quantity);
+    }
+}
+
+void placeOrder(struct Product *inventory, int productCount, struct Order *orders, int *orderCount) {
+    int productId, quantity;
+
+    displayProducts(inventory, productCount);
+
+    printf("Enter the product ID you want to order: ");
+    scanf("%d", &productId);
+
+    if (productId <= 0 || productId > productCount) {
+        printf("Invalid product ID!\n");
+        return;
+    }
+
+    printf("Enter the quantity: ");
+    scanf("%d", &quantity);
+
+    if (quantity <= 0 || quantity > inventory[productId - 1].quantity) {
+        printf("Invalid quantity or insufficient stock!\n");
+        return;
+    }
+
+    // Create an order
+    orders[*orderCount].orderId = *orderCount + 1;
+    orders[*orderCount].product = inventory[productId - 1];
+    orders[*orderCount].quantity = quantity;
+    orders[*orderCount].total = quantity * inventory[productId - 1].price;
+
+    // Update inventory
+    inventory[productId - 1].quantity -= quantity;
+
+    (*orderCount)++;
+
+    printf("Order placed successfully!\n");
+}
+
+void displayOrders(struct Order *orders, int orderCount) {
+    printf("Order ID\tProduct Name\tQuantity\tTotal\n");
+    for (int i = 0; i < orderCount; i++) {
+        printf("%d\t\t%s\t\t%d\t\t$%.2f\n", orders[i].orderId, orders[i].product.name,
+               orders[i].quantity, orders[i].total);
+    }
+}
+
+void displayMenu() {
+    printf("\nE-commerce Management System\n");
+    printf("1. Add Product\n");
+    printf("2. Display Products\n");
+    printf("3. Place Order\n");
+    printf("4. Display Orders\n");
+    printf("5. Exit\n");
+    printf("Enter your choice: ");
+}
+
+int main() {
+    struct Product inventory[MAX_PRODUCTS];
+    struct Order orders[MAX_ORDERS];
+    int productCount = 0;
+    int orderCount = 0;
+    int choice;
+
+    do {
+        displayMenu();
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                addProduct(inventory, &productCount);
+                break;
+            case 2:
+                displayProducts(inventory, productCount);
+                break;
+            case 3:
+                placeOrder(inventory, productCount, orders, &orderCount);
+                break;
+            case 4:
+                displayOrders(orders, orderCount);
+                break;
+            case 5:
+                printf("Exiting the program. Goodbye!\n");
+                break;
+            default:
+                printf("Invalid choice! Please enter a valid option.\n");
+        }
+
+    } while (choice != 5);
+
+    return 0;
+}
+
